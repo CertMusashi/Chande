@@ -1,7 +1,7 @@
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status"></a>
   <a href="#"><img src="https://img.shields.io/badge/Version-2.0.0-informational?style=for-the-badge" alt="Version"></a>
-  <a href="https://certmusashi.github.io/New_chande"><img src="https://img.shields.io/badge/Demo-Online-blueviolet?style=for-the-badge" alt="Demo"></a>
+  <a href="https://certmusashi.github.io/Chande"><img src="https://img.shields.io/badge/Demo-Online-blueviolet?style=for-the-badge" alt="Demo"></a>
 </p>
 ---
 
