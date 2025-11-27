@@ -116,7 +116,7 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -124,104 +124,240 @@ h1 {
 }
 
 .modal-content {
-    background-color: white;
-    padding: 15px;
-    border-radius: 10px;
-    width: 270px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    width: 300px;
+    max-width: 90vw;
     position: relative;
 }
 
-.close {
-    position: absolute;
-    top: 10px;
-    right: 10px; /* بردم سمت راست */
-    font-size: 18px;
-    cursor: pointer;
-}
-
-.currency-item {
-    margin: 8px 0;
-    display: flex;
-    align-items: center;
-}
-
-.currency-item input {
-    margin-left: 8px;
-    cursor: pointer;
-}
-
-.modal-content h2 {
-    margin-top: 0;
-    font-size: 18px;
-    color: #333;
-}
-
-.currency-item label {
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-}
-
-#settings-btn {
-    font-size: 15px;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.settings-section {
-    margin: 12px 0;
-    padding: 12px;
-    border-radius: 10px;
-    background: #f5f5f5;
-    border: 1px solid #eee;
+/* Modal Header */
+.modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
 }
 
-.settings-section label {
-    font-size: 14px;
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
 }
 
-/* دکمه Manage Cards */
-.card-btn {
-    font-size: 14px;
-    font-weight: bold;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 8px;
-    background: #fff;   
-    color: #000;        
+.close {
+    font-size: 24px;
     cursor: pointer;
-    border: 1px solid #ccc;
+    color: #999;
+    line-height: 1;
+    transition: color 0.2s;
 }
 
-/* ورودی Grid Size */
-.grid-Input {
+.close:hover {
+    color: #333;
+}
+
+/* Settings Modal */
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f8f8f8;
+    border-radius: 10px;
+}
+
+.settings-label {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .slider {
+    background-color: #4CAF50;
+}
+
+.toggle-switch input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+/* Size Input */
+.size-input {
     width: 60px;
-    padding: 5px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
     text-align: center;
+    font-size: 14px;
+    background: #fff;
+}
+
+.size-input:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+/* Manage Cards Button */
+.manage-cards-btn-container {
+    justify-content: center;
+    background: transparent;
+    padding: 8px;
+}
+
+.manage-cards-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.manage-cards-btn:hover {
+    background: #444;
+}
+
+/* Manage Cards Modal */
+.manage-cards-modal {
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Search Container */
+.search-container {
+    margin-bottom: 12px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #f8f8f8;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    border-color: #4CAF50;
+    outline: none;
+    background: #fff;
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+/* Currency List */
+.currency-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 50vh;
+}
+
+.currency-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: #f8f8f8;
+    border-radius: 10px;
+}
+
+.currency-item-info {
+    flex: 1;
+}
+
+.currency-item-info label {
     font-size: 13px;
+    color: #333;
+    cursor: pointer;
 }
 
-.grid-Input:focus {
-    border: 1px solid #4facfe;
+.no-results {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    padding: 20px 0;
 }
 
-/* حالت دارک مود */
-body.dark-mode {
-    background-color: #1e1e1e;
+#settings-btn {
+    cursor: pointer;
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+    color: #666;
+    transition: color 0.2s;
+}
+
+#settings-btn:hover {
+    color: #333;
+}
+
+body.dark-mode #settings-btn {
+    color: #888;
+}
+
+body.dark-mode #settings-btn:hover {
     color: #f0f0f0;
 }
 
-body.dark-mode .settings-section,
-body.dark-mode .currency-item,
-body.dark-mode .modal-content,
-body.dark-mode .currency-item label,
-body.dark-mode .modal-content h2 {
-    background-color: #2c2c2c;
+/* Dark Mode */
+body.dark-mode {
+    background-color: #1e1e1e;
     color: #f0f0f0;
 }
 
@@ -230,14 +366,75 @@ body.dark-mode .card {
     color: #fff;
 }
 
-body.dark-mode .card-btn {
-    background: #1e1e1e; 
-    color: #fff;
-    border: 1px solid #666;
+body.dark-mode .modal-content {
+    background-color: #2c2c2c;
 }
 
-body.dark-mode .grid-Input {
+body.dark-mode .modal-header {
+    border-bottom-color: #444;
+}
+
+body.dark-mode .modal-header h2 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .close {
+    color: #888;
+}
+
+body.dark-mode .close:hover {
+    color: #f0f0f0;
+}
+
+body.dark-mode .settings-item {
+    background: #333;
+}
+
+body.dark-mode .settings-label {
+    color: #f0f0f0;
+}
+
+body.dark-mode .size-input {
     background: #1e1e1e;
-    color: #fff;        
-    border: 1px solid #555;
+    color: #fff;
+    border-color: #555;
+}
+
+body.dark-mode .size-input:focus {
+    border-color: #4CAF50;
+}
+
+body.dark-mode .manage-cards-btn {
+    background: #555;
+}
+
+body.dark-mode .manage-cards-btn:hover {
+    background: #666;
+}
+
+body.dark-mode .search-input {
+    background: #333;
+    color: #fff;
+    border-color: #555;
+}
+
+body.dark-mode .search-input:focus {
+    background: #2c2c2c;
+    border-color: #4CAF50;
+}
+
+body.dark-mode .search-input::placeholder {
+    color: #888;
+}
+
+body.dark-mode .currency-item {
+    background: #333;
+}
+
+body.dark-mode .currency-item-info label {
+    color: #f0f0f0;
+}
+
+body.dark-mode .no-results {
+    color: #888;
 }

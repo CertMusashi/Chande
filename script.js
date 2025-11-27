@@ -1,7 +1,6 @@
 const apiUrl = 'https://raw.githubusercontent.com/CertMusashi/Chande-api/refs/heads/main/arz.json?' + new Date().getTime();
 let userCurrencies = JSON.parse(localStorage.getItem('userCurrencies')) || ["usd", "eur", "18ayar","btc"];
-
-//.
+let reversePriceColors = localStorage.getItem('reversePriceColors') === 'true';
 
 function createCard(currency) {
     const card = document.createElement('div');
@@ -53,14 +52,21 @@ function openCurrencySelector() {
     modal.classList.add('modal');
 
     const modalContent = document.createElement('div');
-    modalContent.classList.add('modal-content');
-    modalContent.style.maxHeight = '80vh';
-    modalContent.style.overflowY = 'auto';
+    modalContent.classList.add('modal-content', 'manage-cards-modal');
+
+    const header = document.createElement('div');
+    header.classList.add('modal-header');
+
+    const title = document.createElement('h2');
+    title.textContent = 'Manage Cards';
 
     const closeButton = document.createElement('span');
     closeButton.classList.add('close');
     closeButton.textContent = '×';
     closeButton.addEventListener('click', () => modal.remove());
+
+    header.appendChild(title);
+    header.appendChild(closeButton);
 
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -68,40 +74,89 @@ function openCurrencySelector() {
         }
     });
 
-    const title = document.createElement('h2');
-    title.textContent = 'Currencies';
+    // Search bar
+    const searchContainer = document.createElement('div');
+    searchContainer.classList.add('search-container');
 
-    modalContent.appendChild(closeButton);
-    modalContent.appendChild(title);
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.classList.add('search-input');
+    searchInput.placeholder = 'Search currencies...';
+
+    searchContainer.appendChild(searchInput);
+
+    // Currency list container
+    const currencyList = document.createElement('div');
+    currencyList.classList.add('currency-list');
+
+    modalContent.appendChild(header);
+    modalContent.appendChild(searchContainer);
+    modalContent.appendChild(currencyList);
 
     fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
-            data.currencies.forEach(currency => {
-                const currencyItem = document.createElement('div');
-                currencyItem.classList.add('currency-item');
+            const renderCurrencies = (filter = '') => {
+                currencyList.innerHTML = '';
+                const filteredCurrencies = data.currencies.filter(currency => 
+                    currency.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    currency.code.toLowerCase().includes(filter.toLowerCase()) ||
+                    (currency.en && currency.en.toLowerCase().includes(filter.toLowerCase()))
+                );
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = currency.code;
-                checkbox.checked = userCurrencies.includes(currency.code);
-                checkbox.addEventListener('change', () => {
-                    if (checkbox.checked) {
-                        userCurrencies.push(currency.code);
-                    } else {
-                        userCurrencies = userCurrencies.filter(code => code !== currency.code);
-                    }
-                    localStorage.setItem('userCurrencies', JSON.stringify(userCurrencies));
-                    updateCurrencyData();
+                filteredCurrencies.forEach(currency => {
+                    const currencyItem = document.createElement('div');
+                    currencyItem.classList.add('currency-item');
+
+                    const currencyInfo = document.createElement('div');
+                    currencyInfo.classList.add('currency-item-info');
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `currency-${currency.code}`;
+                    label.textContent = `${currency.name} (${currency.code.toUpperCase()})`;
+
+                    currencyInfo.appendChild(label);
+
+                    const toggleWrapper = document.createElement('label');
+                    toggleWrapper.classList.add('toggle-switch');
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `currency-${currency.code}`;
+                    checkbox.checked = userCurrencies.includes(currency.code);
+                    checkbox.addEventListener('change', () => {
+                        if (checkbox.checked) {
+                            userCurrencies.push(currency.code);
+                        } else {
+                            userCurrencies = userCurrencies.filter(code => code !== currency.code);
+                        }
+                        localStorage.setItem('userCurrencies', JSON.stringify(userCurrencies));
+                        updateCurrencyData();
+                    });
+
+                    const slider = document.createElement('span');
+                    slider.classList.add('slider');
+
+                    toggleWrapper.appendChild(checkbox);
+                    toggleWrapper.appendChild(slider);
+
+                    currencyItem.appendChild(currencyInfo);
+                    currencyItem.appendChild(toggleWrapper);
+                    currencyList.appendChild(currencyItem);
                 });
 
-                const label = document.createElement('label');
-                label.htmlFor = currency.code;
-                label.textContent = `${currency.name} (${currency.code})`;
+                if (filteredCurrencies.length === 0) {
+                    const noResults = document.createElement('p');
+                    noResults.classList.add('no-results');
+                    noResults.textContent = 'No currencies found';
+                    currencyList.appendChild(noResults);
+                }
+            };
 
-                currencyItem.appendChild(checkbox);
-                currencyItem.appendChild(label);
-                modalContent.appendChild(currencyItem);
+            renderCurrencies();
+
+            searchInput.addEventListener('input', (e) => {
+                renderCurrencies(e.target.value);
             });
         });
 
@@ -114,88 +169,149 @@ function openSettings() {
     modal.classList.add('modal');
 
     const modalContent = document.createElement('div');
-    modalContent.classList.add('modal-content');
+    modalContent.classList.add('modal-content', 'settings-modal');
+
+    const header = document.createElement('div');
+    header.classList.add('modal-header');
+
+    const title = document.createElement('h2');
+    title.textContent = 'Settings';
 
     const closeButton = document.createElement('span');
     closeButton.classList.add('close');
     closeButton.textContent = '×';
     closeButton.addEventListener('click', () => modal.remove());
 
-    // بخش بالا: دارک مود و دکمه Manage Cards کنار هم
-    const topSection = document.createElement('div');
-    topSection.classList.add('settings-top');
-    topSection.style.display = 'flex';
-    topSection.style.justifyContent = 'space-between';
-    topSection.style.alignItems = 'center';
-    topSection.style.gap = '20px';
+    header.appendChild(title);
+    header.appendChild(closeButton);
 
-    // دارک مود
-    const darkModeSection = document.createElement('div');
-    darkModeSection.classList.add('settings-section');
-    const darkModeLabel = document.createElement('label');
-    const darkModeToggle = document.createElement('input');
-    darkModeToggle.type = 'checkbox';
-    darkModeToggle.checked = document.body.classList.contains('dark-mode');
-    darkModeToggle.addEventListener('change', () => {
-        document.body.classList.toggle('dark-mode', darkModeToggle.checked);
-        localStorage.setItem('darkMode', darkModeToggle.checked);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
     });
-    darkModeLabel.textContent = ' Dark Mode ';
-    darkModeLabel.prepend(darkModeToggle);
-    darkModeSection.appendChild(darkModeLabel);
 
-    // دکمه Manage Cards
-    const cardSection = document.createElement('div');
-    cardSection.classList.add('settings-section');
-    const cardBtn = document.createElement('button');
-    cardBtn.textContent = 'Manage Cards';
-    cardBtn.classList.add('card-btn');
-    cardBtn.addEventListener('click', () => {
-        modal.remove();
-        openCurrencySelector();
+    // Settings list
+    const settingsList = document.createElement('div');
+    settingsList.classList.add('settings-list');
+
+    // Dark Mode setting
+    const darkModeItem = document.createElement('div');
+    darkModeItem.classList.add('settings-item');
+
+    const darkModeLabel = document.createElement('span');
+    darkModeLabel.classList.add('settings-label');
+    darkModeLabel.textContent = 'Dark Mode';
+
+    const darkModeToggle = document.createElement('label');
+    darkModeToggle.classList.add('toggle-switch');
+
+    const darkModeCheckbox = document.createElement('input');
+    darkModeCheckbox.type = 'checkbox';
+    darkModeCheckbox.checked = document.body.classList.contains('dark-mode');
+    darkModeCheckbox.addEventListener('change', () => {
+        document.body.classList.toggle('dark-mode', darkModeCheckbox.checked);
+        localStorage.setItem('darkMode', darkModeCheckbox.checked);
     });
-    cardSection.appendChild(cardBtn);
 
-    // گذاشتن دوتا آیتم کنار هم
-    topSection.appendChild(darkModeSection);
-    topSection.appendChild(cardSection);
+    const darkModeSlider = document.createElement('span');
+    darkModeSlider.classList.add('slider');
 
-    // بخش تغییر اندازه Grid
-    const gridSection = document.createElement('div');
-    gridSection.classList.add('settings-section');
-    const gridLabel = document.createElement('label');
-    gridLabel.textContent = 'Cards Size: ';
+    darkModeToggle.appendChild(darkModeCheckbox);
+    darkModeToggle.appendChild(darkModeSlider);
+
+    darkModeItem.appendChild(darkModeLabel);
+    darkModeItem.appendChild(darkModeToggle);
+
+    // Price Color Reverse setting
+    const priceColorItem = document.createElement('div');
+    priceColorItem.classList.add('settings-item');
+
+    const priceColorLabel = document.createElement('span');
+    priceColorLabel.classList.add('settings-label');
+    priceColorLabel.textContent = 'Reverse Price Colors';
+
+    const priceColorToggle = document.createElement('label');
+    priceColorToggle.classList.add('toggle-switch');
+
+    const priceColorCheckbox = document.createElement('input');
+    priceColorCheckbox.type = 'checkbox';
+    priceColorCheckbox.checked = reversePriceColors;
+    priceColorCheckbox.addEventListener('change', () => {
+        reversePriceColors = priceColorCheckbox.checked;
+        localStorage.setItem('reversePriceColors', reversePriceColors);
+        updateCurrencyData();
+    });
+
+    const priceColorSlider = document.createElement('span');
+    priceColorSlider.classList.add('slider');
+
+    priceColorToggle.appendChild(priceColorCheckbox);
+    priceColorToggle.appendChild(priceColorSlider);
+
+    priceColorItem.appendChild(priceColorLabel);
+    priceColorItem.appendChild(priceColorToggle);
+
+    // Cards Size setting
+    const gridSizeItem = document.createElement('div');
+    gridSizeItem.classList.add('settings-item');
+
+    const gridSizeLabel = document.createElement('span');
+    gridSizeLabel.classList.add('settings-label');
+    gridSizeLabel.textContent = 'Cards Size';
+
     const gridInput = document.createElement('input');
     gridInput.type = 'number';
-    gridInput.classList.add('grid-Input');
+    gridInput.classList.add('size-input');
     gridInput.value = localStorage.getItem('gridSize') || 155;
+    gridInput.min = 100;
+    gridInput.max = 300;
     gridInput.addEventListener('input', () => {
         const size = gridInput.value || 155;
         document.documentElement.style.setProperty('--grid-size', size + 'px');
         localStorage.setItem('gridSize', size);
     });
-    gridLabel.appendChild(gridInput);
-    gridSection.appendChild(gridLabel);
 
-    modalContent.appendChild(closeButton);
-    modalContent.appendChild(topSection); // دارک مود و دکمه Manage Cards کنار هم
-    modalContent.appendChild(gridSection);
+    gridSizeItem.appendChild(gridSizeLabel);
+    gridSizeItem.appendChild(gridInput);
+
+    // Manage Cards button
+    const manageCardsItem = document.createElement('div');
+    manageCardsItem.classList.add('settings-item', 'manage-cards-btn-container');
+
+    const manageCardsBtn = document.createElement('button');
+    manageCardsBtn.textContent = 'Manage Cards';
+    manageCardsBtn.classList.add('manage-cards-btn');
+    manageCardsBtn.addEventListener('click', () => {
+        modal.remove();
+        openCurrencySelector();
+    });
+
+    manageCardsItem.appendChild(manageCardsBtn);
+
+    settingsList.appendChild(darkModeItem);
+    settingsList.appendChild(priceColorItem);
+    settingsList.appendChild(gridSizeItem);
+    settingsList.appendChild(manageCardsItem);
+
+    modalContent.appendChild(header);
+    modalContent.appendChild(settingsList);
 
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
 }
 
-// اجرای تنظیمات در لود صفحه
+// Initialize settings on page load
 document.addEventListener('DOMContentLoaded', () => {
-    // دکمه تنظیمات
+    // Settings button
     document.getElementById('settings-btn').addEventListener('click', openSettings);
 
-    // دارک مود ذخیره‌شده
+    // Restore saved dark mode preference
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
 
-    // اندازه grid ذخیره‌شده
+    // Restore saved grid size
     const gridSize = localStorage.getItem('gridSize') || 155;
     document.documentElement.style.setProperty('--grid-size', gridSize + 'px');
 });
@@ -267,27 +383,30 @@ async function updateCurrencyData() {
 
             let currentPrice = currency.price;
 
-            // دریافت قیمت قبلی از localStorage (خام)
+            // Get previous price from localStorage
             const lastSeenPrice = getLastSeenPrice(currency.code);
 
-            // محاسبه تغییرات قیمت
+            // Calculate price change
             const priceChange = Math.floor(calculatePriceChange(currentPrice, lastSeenPrice));
 
-            // نمایش تغییرات قیمت
+            // Display price change
+            const increaseColor = reversePriceColors ? '#e74c3c' : '#2ecc71';
+            const decreaseColor = reversePriceColors ? '#2ecc71' : '#e74c3c';
+
             if (priceChange > 0) {
                 changeElement.textContent = `↑ ${priceChange.toLocaleString('en-US')}`;
-                changeElement.style.color = '#2ecc71';
+                changeElement.style.color = increaseColor;
             } else if (priceChange < 0) {
                 changeElement.textContent = `↓ ${Math.abs(priceChange).toLocaleString('en-US')}`;
-                changeElement.style.color = '#e74c3c';
+                changeElement.style.color = decreaseColor;
             } else {
                 changeElement.textContent = '';
             }
 
-            // ذخیره قیمت جدید در localStorage به صورت خام
+            // Save new price to localStorage
             saveLastSeenPrice(currency.code, currentPrice);
 
-            // نمایش قیمت با فرمت
+            // Display formatted price
             priceElement.textContent = formatPrice(currentPrice);
 
             fragment.appendChild(card);
@@ -297,7 +416,7 @@ async function updateCurrencyData() {
     grid.replaceChildren(fragment);
 }
 
-// دریافت داده‌ها هنگام لود صفحه
+// Fetch data on page load
 updateCurrencyData();
 
 if ('serviceWorker' in navigator) {
